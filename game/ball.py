@@ -15,36 +15,38 @@ class Ball:
         self.velocity_y = random.choice([-3, 3])
 
     def move(self):
-        self.x += self.velocity_x
-        self.y += self.velocity_y
+        # Move in sub-steps to prevent high-speed tunneling
+        steps = max(abs(self.velocity_x), abs(self.velocity_y))
+        if steps == 0:
+            steps = 1
 
-        if self.y <= 0 or self.y + self.height >= self.screen_height:
-            self.velocity_y *= -1
+        for _ in range(steps):
+            self.x += self.velocity_x / steps
+            self.y += self.velocity_y / steps
+
+            # Bounce off top/bottom walls
+            if self.y <= 0:
+                self.y = 0
+                self.velocity_y *= -1
+            elif self.y + self.height >= self.screen_height:
+                self.y = self.screen_height - self.height
+                self.velocity_y *= -1
 
     def check_collision(self, player, ai):
-        ball_rect = self.rect()
-        
-        # Check collision with player paddle
-        if ball_rect.colliderect(player.rect()):
-            if self.velocity_x < 0:  # Ball moving towards player
-                self.x = player.x + player.width
-                self.velocity_x *= -1
-                # Add some randomness to make it interesting
-                self.velocity_y += random.uniform(-1, 1)
-        
-        # Check collision with AI paddle
-        if ball_rect.colliderect(ai.rect()):
-            if self.velocity_x > 0:  # Ball moving towards AI
-                self.x = ai.x - self.width
-                self.velocity_x *= -1
-                # Add some randomness
-                self.velocity_y += random.uniform(-1, 1)
+        # Collision with player paddle
+        if self.rect().colliderect(player.rect()):
+            self.x = player.x + player.width
+            self.velocity_x *= -1
+        # Collision with AI paddle
+        elif self.rect().colliderect(ai.rect()):
+            self.x = ai.x - self.width
+            self.velocity_x *= -1
 
     def reset(self):
         self.x = self.original_x
         self.y = self.original_y
-        self.velocity_x *= -1
+        self.velocity_x = random.choice([-5, 5])
         self.velocity_y = random.choice([-3, 3])
 
     def rect(self):
-        return pygame.Rect(self.x, self.y, self.width, self.height)
+        return pygame.Rect(int(self.x), int(self.y), self.width, self.height)
