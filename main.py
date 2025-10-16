@@ -2,10 +2,11 @@ import pygame
 from game.game_engine import GameEngine
 
 pygame.init()
+pygame.mixer.init()
 
 WIDTH, HEIGHT = 800, 600
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Ping Pong - Replay Option")
+pygame.display.set_caption("Ping Pong - Pygame Sound")
 
 BLACK = (0, 0, 0)
 clock = pygame.time.Clock()
@@ -24,7 +25,7 @@ def main():
         engine.handle_input()
         engine.update()
         engine.render(SCREEN)
-        engine.check_game_over(SCREEN)  # <- this handles replay
+        engine.check_game_over(SCREEN)
 
         pygame.display.flip()
         clock.tick(FPS)

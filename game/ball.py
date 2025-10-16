@@ -1,5 +1,13 @@
 import pygame
 import random
+from pygame import mixer
+# Initialize Pygame and the mixer
+pygame.init()       # initializes all modules (including mixer)
+mixer.init()        # optional if you want to be explicit
+
+# Load sounds
+PADDLE_HIT_SOUND = mixer.Sound("assets/paddle_hit.wav")
+WALL_BOUNCE_SOUND = mixer.Sound("assets/wall_bounce.mp3")
 
 class Ball:
     def __init__(self, x, y, width, height, screen_width, screen_height):
@@ -15,7 +23,6 @@ class Ball:
         self.velocity_y = random.choice([-3, 3])
 
     def move(self):
-        # Move in sub-steps to prevent high-speed tunneling
         steps = max(abs(self.velocity_x), abs(self.velocity_y))
         if steps == 0:
             steps = 1
@@ -28,19 +35,21 @@ class Ball:
             if self.y <= 0:
                 self.y = 0
                 self.velocity_y *= -1
+                WALL_BOUNCE_SOUND.play()
             elif self.y + self.height >= self.screen_height:
                 self.y = self.screen_height - self.height
                 self.velocity_y *= -1
+                WALL_BOUNCE_SOUND.play()
 
     def check_collision(self, player, ai):
-        # Collision with player paddle
         if self.rect().colliderect(player.rect()):
             self.x = player.x + player.width
             self.velocity_x *= -1
-        # Collision with AI paddle
+            PADDLE_HIT_SOUND.play()
         elif self.rect().colliderect(ai.rect()):
             self.x = ai.x - self.width
             self.velocity_x *= -1
+            PADDLE_HIT_SOUND.play()
 
     def reset(self):
         self.x = self.original_x
